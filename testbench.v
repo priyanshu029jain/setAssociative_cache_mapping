@@ -3,7 +3,7 @@
 module testbench;
     reg clk;
     reg rst;
-    reg [4:0] address;
+    reg [6:0] address;
     reg [7:0] data_in;
     reg write_enable;
     reg read_enable;
@@ -31,7 +31,7 @@ module testbench;
         // Initialize signals
         clk = 0;
         rst = 1;
-        address = 5'b00000;
+        address = 7'b00000;
         data_in = 8'b00000000;
         write_enable = 0;
         read_enable = 0;
@@ -51,17 +51,17 @@ module testbench;
 
         // Wait for a few time units and then change the address
         #10 read_enable = 1'b1; // Enable reading
-        #10 address = 5'b0_0101; 
-        #10 address = 5'b0_1010; 
-        #10 address = 5'b0_1100; 
+        #10 address = 7'b010_0101; 
+        #10 address = 7'b100_1010; 
+        #10 address = 7'b010_1100; 
         #10 read_enable = 1'b0; // Disable reading
 
         // Now enable writing to the cache
         write_enable = 1'b1; // Enable writing
         #10 data_in = 8'h10; 
-            address = 5'b1_1001; 
+            address = 7'b001_1001; 
         #10 data_in = 8'h20; 
-            address = 5'b0_1100; 
+            address = 7'b010_1100; 
         #10 write_enable = 1'b0; // Disable writing
 
         // Read from the same address again to check for a hit
