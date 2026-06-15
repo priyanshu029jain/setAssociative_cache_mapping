@@ -1,0 +1,11 @@
+# --- Icarus Verilog Compiled Binaries ---
+*.vvp
+*.out
+sim_out
+
+# --- Waveform Simulation Traces ---
+*.vcd
+
+# --- Operating System & VS Code Artifacts ---
+.DS_Store
+.vscode/

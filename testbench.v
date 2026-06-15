@@ -46,27 +46,28 @@ module testbench;
                  $time, address, data_in, write_enable, read_enable, data_out, hit, hit_line);
 
 
-        // Reset the system
-        #8 rst = 0;
+         // Reset the system
+        #12 rst = 1'b0; // Deassert reset after 10 time units\
 
-        // Write data to RAM and cache
-        #10 address = 5'b00001; data_in = 8'b10101010; write_enable = 1; read_enable = 0;
-        #10 write_enable = 0;
+        // Wait for a few time units and then change the address
+        #10 read_enable = 1'b1; // Enable reading
+        #10 address = 5'b0_0101; 
+        #10 address = 5'b0_1010; 
+        #10 address = 5'b0_1100; 
+        #10 read_enable = 1'b0; // Disable reading
 
-        // Read data from cache (should be a hit)
-        #10 address = 5'b00001; write_enable = 0; read_enable = 1;
+        // Now enable writing to the cache
+        write_enable = 1'b1; // Enable writing
+        #10 data_in = 8'h10; 
+            address = 5'b1_1001; 
+        #10 data_in = 8'h20; 
+            address = 5'b0_1100; 
+        #10 write_enable = 1'b0; // Disable writing
 
-        // Read data from RAM (should be a miss)
-        #10 address = 5'b00010; write_enable = 0; read_enable = 1;
+        // Read from the same address again to check for a hit
+        read_enable = 1'b1; // Enable reading again
 
-        // Write new data to RAM and cache
-        #10 address = 5'b00010; data_in = 8'b11110000; write_enable = 1; read_enable = 0;
-        #10 write_enable = 0;
-
-        // Read the newly written data (should be a hit)
-        #10 address = 5'b00010; write_enable = 0; read_enable = 1;
-
-       $display("Simulation finished.");
+        $display("Simulation finished.");
         // Finish simulation after some time
         #15 $finish;
     end
