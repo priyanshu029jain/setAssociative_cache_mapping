@@ -1,18 +1,25 @@
 `timescale 1ns / 1ps
+//`include "fullyAssociative_mapping.v" 
+
 
 module testbench;
     reg clk;
     reg rst;
-    reg [6:0] address;
-    reg [7:0] data_in;
+    reg [7:0] address;
+    reg [15:0] data_in;
     reg write_enable;
     reg read_enable;
-    wire [7:0] data_out;
+    wire [15:0] data_out;
     wire hit;
-    wire [1:0] hit_line;
+    wire [2:0] hit_line;
 
-    // Instantiate the setAssociative_mapping module
-    setAssociative_mapping uut (
+    setAssociative_mapping #(
+        .WORD_SIZE(2),  // Size of a word in bytesS
+        .BLOCK_SIZE(4), // Number of words per block
+        .CACHE_LINES(8),   // Number of lines in the cache
+        .K_ways(2),
+        .RAM_BLOCKS(64)  // Number of blocks in memory
+    ) dut (
         .clk(clk),
         .rst(rst),
         .address(address),
@@ -23,18 +30,17 @@ module testbench;
         .hit(hit),
         .hit_line(hit_line)
     );
+      // Clock generation
+    always #5 clk = ~clk; // 10 time units period
 
-    always #5 clk = ~clk; // Clock generation
-
-    // Test sequence
     initial begin
-        // Initialize signals
-        clk = 0;
-        rst = 1;
-        address = 7'b00000;
-        data_in = 8'b00000000;
-        write_enable = 0;
-        read_enable = 0;
+        // Initialize inputs
+        clk = 1'b0;
+        rst = 1'b1;
+        address = 8'b0000_0000; 
+        data_in = 16'h0000; 
+        write_enable = 1'b0;
+        read_enable = 1'b0; 
 
         //dumpfile and dumpvars for waveform generation
         $dumpfile("testbench.vcd");
@@ -45,23 +51,22 @@ module testbench;
         $monitor("Time: %0t | Address: %b | Data In: %b | Write Enable: %b | Read Enable: %b | Data Out: %b | Hit: %b | Hit Line: %b", 
                  $time, address, data_in, write_enable, read_enable, data_out, hit, hit_line);
 
-
-         // Reset the system
+        // Reset the system
         #12 rst = 1'b0; // Deassert reset after 10 time units\
 
         // Wait for a few time units and then change the address
         #10 read_enable = 1'b1; // Enable reading
-        #10 address = 7'b010_0101; 
-        #10 address = 7'b100_1010; 
-        #10 address = 7'b010_1100; 
+        #10 address = 8'h14; 
+        #10 address = 8'h28; 
+        #10 address = 8'h36; 
         #10 read_enable = 1'b0; // Disable reading
 
         // Now enable writing to the cache
         write_enable = 1'b1; // Enable writing
-        #10 data_in = 8'h10; 
-            address = 7'b001_1001; 
-        #10 data_in = 8'h20; 
-            address = 7'b010_1100; 
+        #10 data_in = 16'h1010; 
+            address = 8'h19; 
+        #10 data_in = 16'h2020; 
+            address = 8'h16; 
         #10 write_enable = 1'b0; // Disable writing
 
         // Read from the same address again to check for a hit
