@@ -19,7 +19,7 @@ $$\text{Total Addressable Elements} = \text{RAM\_BLOCKS} \times \text{BLOCK\_SIZ
 To address these elements, the module builds a **7-bit physical address bus** via `$clog2(128) = 7`. The address bus breaks down structurally into three dedicated fields:
 
 ```text
- Bit Position:   [6]     [5]     [4]     [3]  |    [2]    |   [1]     [0]
+ Bit Position:   [6]       [5]       [4]       [3]    |    [2]    |   [1]       [0]
  Field Mapping:  <------- Tag (4 bits) ------>| Index (1) | <- Offset (2 bits) ->
  ```
   
