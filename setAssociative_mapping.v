@@ -1,17 +1,11 @@
-//word = 1 byte
-//block = 4 word
-//lines = 4
-//sey  = 2
-//ram = 32
-
 `define BYTE 8
 `define FILE "storage.mem"
 
 module setAssociative_mapping #(
     parameter WORD_SIZE = 1, //bytes in word
-    parameter BLOCK_SIZE = 4, //no. of words per block
-    parameter CACHE_LINES = 4, //no of lines in cache
-    parameter K_ways = 2, // no of lines per set #K-way
+    parameter BLOCK_SIZE = 2, //no. of words per block
+    parameter CACHE_LINES = 32, //no of lines in cache
+    parameter K_ways = 4, // no of lines per set #K-way
     parameter RAM_BLOCKS = 32 //no of block in RAM memory
   ) (
     input wire clk, // clock signal
@@ -161,7 +155,6 @@ module setAssociative_mapping #(
   // -------------------------------
   always @(posedge clk or posedge rst)
   begin : cache_operations
-
     //reset the cache on high rst
     //async reset
     if (rst)
@@ -176,7 +169,6 @@ module setAssociative_mapping #(
       //read when rd = low and wr = high
       if (read_enable && !write_enable)
       begin : read_operation
-
         //cache_searching for hit
         cache_search(line_in_set);
 
@@ -185,12 +177,10 @@ module setAssociative_mapping #(
           //output_data from cache
           data_out <= cache[set_index][line_in_set][word_offset*word_bites +: word_bites];
         end
-
         else
         begin : cache_miss
           // Output_data from RAM
           data_out <= RAM[block_no][word_offset * word_bites +: word_bites];
-
           //replace the cache with RAM
           cache_replacement();
         end
@@ -199,10 +189,8 @@ module setAssociative_mapping #(
       //write when rd = low and wr = high
       else if (write_enable && !read_enable)
       begin : write_operation
-
         //cache searching
         cache_search(line_in_set);
-
         // Write the data to RAM (always update the RAM)
         RAM[block_no][word_offset * word_bites +: word_bites] <= data_in;
 
@@ -211,7 +199,6 @@ module setAssociative_mapping #(
           //only update a particular word in block
           cache[set_index][line_in_set][word_offset*word_bites +: word_bites] <= data_in;
         end
-
         else
         begin : cache_miss
           //replace the cache from RAM
